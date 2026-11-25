@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Theaveas So: media pipelines, zero-downtime deployments, data warehouses, and hand-written C++ and graphics.">
+</head>
+<body>
+<title>Theaveas So Portfolio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one left-aligned column; each project is a short case study with its real pipeline drawn as a strip of stages. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#111a24; --muted:#566373; --line:#d5dbe2;
+  --accent:#1d55c9; --accent-soft:#e3ebfb; --wip:#8a5a00; --wip-soft:#f7ecd2;
+  --display:"Space Grotesk","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141a; --surface:#161d26; --fg:#e6ebf0; --muted:#98a5b3; --line:#2a3440;
+  --accent:#8ab0ff; --accent-soft:#1b2a47; --wip:#e7b95a; --wip-soft:#3a2e14; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141a; --surface:#161d26; --fg:#e6ebf0; --muted:#98a5b3; --line:#2a3440;
+  --accent:#8ab0ff; --accent-soft:#1b2a47; --wip:#e7b95a; --wip-soft:#3a2e14; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--body)}
+.page{max-width:860px;margin:0 auto;padding-block:48px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:56px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(34px,7vw,52px);font-weight:600;letter-spacing:-.02em}
+h2{font-size:14px;font-family:var(--mono);font-weight:500;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+h3{font-size:24px;font-weight:600}
+p{margin:0;max-width:66ch}
+.intro{display:flex;flex-direction:column;gap:18px}
+.lede{font-size:20px;line-height:1.5;max-width:60ch}
+.facts{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;color:var(--muted)}
+.facts b{color:var(--fg);font-weight:500}
+.links{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;font-size:15px}
+.copy{font:inherit;font-family:var(--mono);font-size:13.5px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+.copy:hover{border-color:var(--accent)}
+.email{font-family:var(--mono);font-size:14.5px;user-select:all}
+section{display:flex;flex-direction:column;gap:28px}
+.case{display:flex;flex-direction:column;gap:14px;padding-top:28px;border-top:1px solid var(--line)}
+.case:first-of-type{padding-top:0;border-top:0}
+.where{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.pipe{display:flex;flex-wrap:wrap;gap:8px 0;align-items:center;font-family:var(--mono);font-size:13.5px;margin:4px 0}
+.pipe span{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:5px 10px;white-space:nowrap}
+.pipe span:not(:last-child)::after{content:"→";color:var(--accent);position:relative;left:21px;margin-right:0}
+.pipe span:not(:last-child){margin-right:26px}
+.pipe .bad{border-style:dashed;color:var(--muted)}
+.piperow{display:grid;grid-template-columns:64px 1fr;gap:6px 10px;align-items:center}
+.piperow > i{font:normal 12px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.result{border-left:3px solid var(--accent);padding-left:14px;font-weight:500}
+.stack{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.tag{display:inline-block;font:500 12px var(--mono);border-radius:4px;padding:2px 8px;vertical-align:middle;margin-left:8px;letter-spacing:.02em}
+.tag.wip{background:var(--wip-soft);color:var(--wip)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px 32px}
+.grid > div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.grid h3{font-size:19px}
+.earlier{display:grid;grid-template-columns:150px 1fr;gap:14px 20px;font-size:15.5px}
+.earlier dt{font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:3px}
+.earlier dd{margin:0}
+.earlier strong{font-weight:600}
+footer{border-top:1px solid var(--line);padding-top:24px;display:flex;flex-direction:column;gap:10px;color:var(--muted);font-size:15px}
+@media (max-width:560px){.earlier{grid-template-columns:1fr;gap:2px 0}.earlier dd{margin-bottom:14px}.piperow{grid-template-columns:1fr}}
+</style>
+
+<main class="page">
+<header class="intro">
+  <h1>Theaveas So</h1>
+  <p class="lede">I build and run the systems behind products: media pipelines, deployments that don't take the site down, and the data people use to make decisions. Lately I've been writing C++ and graphics code by hand.</p>
+  <div class="facts"><span><b>Available now</b></span><span>Phnom Penh, Cambodia · UTC+7</span><span>Remote</span><span>English · Mandarin · Khmer</span></div>
+  <div class="links">
+    <span class="email" id="email">theaveas.so@gmail.com</span>
+    <button class="copy" id="copy" type="button">Copy email</button>
+    <a href="https://github.com/theaveasso" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://www.linkedin.com/in/theaveasso" target="_blank" rel="noopener">LinkedIn</a>
+  </div>
+</header>
+
+<section aria-labelledby="work">
+  <h2 id="work">Work at Everlast · 2025–2026</h2>
+
+  <article class="case">
+    <div class="where">Streaming · about 6,000 daily users</div>
+    <h3>The media centre behind a video and music service</h3>
+    <p>I built and ran the pipeline that takes a source file and turns it into something thousands of people watch every day. It also turns a library of on-demand content into channels that run around the clock.</p>
+    <div class="pipe"><span>source file</span><span>FFmpeg transcode</span><span>encrypted HLS</span><span>24/7 scheduler</span><span>CDN</span><span>MacCMS front end</span></div>
+    <p>The front end is MacCMS, which I set up and hosted myself. I had never used it before and ended up knowing it inside out.</p>
+    <div class="stack">FFmpeg · HLS · OvenMediaEngine · MacCMS · TypeScript</div>
+  </article>
+
+  <article class="case">
+    <div class="where">Uploads</div>
+    <h3>Large uploads that stopped timing out</h3>
+    <p>Big video files went through the browser and nginx, and kept timing out. The servers also had old spinning disks, so transcoding on them was slow. I moved the heavy work to the machine that already had the file.</p>
+    <div class="piperow"><i>Before</i><div class="pipe"><span class="bad">browser</span><span class="bad">nginx</span><span class="bad">server transcode</span></div></div>
+    <div class="piperow"><i>After</i><div class="pipe"><span>Electron app</span><span>local transcode</span><span>SeaweedFS</span></div></div>
+    <p class="result">Uploads no longer pass through nginx, and transcoding load came off the servers.</p>
+    <div class="stack">Electron · FFmpeg · SeaweedFS</div>
+  </article>
+
+  <article class="case">
+    <div class="where">Infrastructure · 5 GCP instances, edge servers, 40+ containers</div>
+    <h3>Deploys with no downtime</h3>
+    <p>I ran all the infrastructure and set up delivery so that shipping never interrupts users. Releases are blue-green, services shut down gracefully, and queued jobs pick up again after a release.</p>
+    <div class="pipe"><span>git push</span><span>GitLab CI build · ~5 min</span><span>Harbor registry</span><span>Dokploy</span><span>blue-green switch</span><span>DB migrations</span></div>
+    <p class="result">1,300+ commits shipped this way, with no major outages.</p>
+    <div class="stack">Docker · Dokploy · GitLab CI · Harbor · Traefik · Prometheus · Sentry</div>
+  </article>
+
+  <article class="case">
+    <div class="where">Data</div>
+    <h3>An analytics warehouse to replace a legacy BI system</h3>
+    <p>The old BI system couldn't keep up. I replaced it with a ClickHouse warehouse fed from every production database, with checks that the data actually arrived, dashboards on top, and runbooks for whoever maintains it next.</p>
+    <div class="pipe"><span>15 MySQL sources</span><span>RabbitMQ</span><span>ClickHouse · 62M+ rows</span><span>Metabase</span></div>
+    <div class="stack">ClickHouse · RabbitMQ · MySQL · Metabase</div>
+  </article>
+</section>
+
+<section aria-labelledby="cpp">
+  <h2 id="cpp">C++ and graphics · written by hand</h2>
+  <div class="grid">
+    <div>
+      <h3>Vulkan renderer <span class="tag wip">in progress</span></h3>
+      <p>A renderer in C++20 on Vulkan. I'm writing it to learn graphics pipelines, GPU memory management and data-oriented design properly.</p>
+      <div class="stack">C++20 · Vulkan · SDL3 · CMake · vcpkg</div>
+    </div>
+    <div>
+      <h3>jagfx</h3>
+      <p>An OpenGL 4.6 take on Sebastian Aaltonen's NoGraphicsAPI ideas: one GPU heap, one root pointer per draw, bindless textures, and layouts shared between C++ and GLSL.</p>
+      <div class="stack">C++ · OpenGL 4.6 · GLSL</div>
+    </div>
+    <div>
+      <h3>Multiplayer prototype</h3>
+      <p>Abilities, attributes and cooldowns on Unreal's Gameplay Ability System, replicated between client and server.</p>
+      <div class="stack">C++ · Unreal Engine 5</div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="how">
+  <h2 id="how">How I work</h2>
+  <p>I start each feature with a short design doc and a plan. For most product work I use AI coding agents to draft, then review what they produce for architecture, coupling and correctness before it ships. C++ I write by hand. I document as I go, and I automate anything I would otherwise have to remember.</p>
+</section>
+
+<section aria-labelledby="earlier">
+  <h2 id="earlier">Earlier</h2>
+  <dl class="earlier">
+    <dt>2024–2025</dt><dd><strong>Tech Lead, VTech.</strong> Led five engineers on a payment gateway built in NestJS, handling 10,000+ transactions a day over a shared peer-to-peer payment protocol. Prototyped a crypto exchange with an order-matching engine in Go; the project was cancelled before launch.</dd>
+    <dt>2022–2024</dt><dd><strong>Software Engineer, Okoone (Ship24).</strong> Worked on a parcel-tracking system on microservices, used by 1M+ people a month. Took releases from weekly to daily with CI/CD and Terraform on AWS.</dd>
+    <dt>2022</dt><dd><strong>Full-Stack Developer, Daunpenh Group.</strong> Rebuilt old WordPress sites as custom apps, making pages load about 3× faster.</dd>
+  </dl>
+</section>
+
+<footer>
+  <p>Looking for remote work in platform and infrastructure, full-stack product engineering, or C++ and graphics.</p>
+  <p><span class="email">theaveas.so@gmail.com</span> · <a href="https://github.com/theaveasso" target="_blank" rel="noopener">github.com/theaveasso</a> · <a href="https://www.linkedin.com/in/theaveasso" target="_blank" rel="noopener">linkedin.com/in/theaveasso</a></p>
+</footer>
+</main>
+
+<script>
+(function(){
+  var b=document.getElementById('copy'),e=document.getElementById('email');
+  b.addEventListener('click',function(){
+    var done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy email'},1600)};
+    var sel=function(){var r=document.createRange();r.selectNodeContents(e);var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected, press copy'};
+    try{navigator.clipboard.writeText(e.textContent).then(done,sel)}catch(x){sel()}
+  });
+})();
+</script>
+
+</body>
+</html>
